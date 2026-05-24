@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}My Results{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="page-header animate-in">
+    <div>
+      <h1 class="page-title">My Results</h1>
+      <p class="page-subtitle">Track your learning progress</p>
+    </div>
+    <a href="{% url 'test_list' %}" class="btn btn-primary"><i class="fas fa-play"></i> Take a Test</a>
+  </div>
+
+  {% if attempts %}
+  <div class="table-responsive animate-in">
+    <table class="data-table">
+      <thead>
+        <tr><th>Test</th><th>Score</th><th>Result</th><th>Correct</th><th>Completed</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for att in attempts %}
+        <tr>
+          <td><strong>{{ att.test.title }}</strong></td>
+          <td><span class="score-pill {% if att.passed %}pass{% else %}fail{% endif %}">{{ att.score|floatformat:1 }}%</span></td>
+          <td>{% if att.passed %}<span class="badge badge-pass">Passed</span>{% else %}<span class="badge badge-fail">Failed</span>{% endif %}</td>
+          <td>{{ att.correct_count }}/{{ att.total_questions }}</td>
+          <td>{{ att.finished_at|date:"M d, Y H:i" }}</td>
+          <td><a href="{% url 'test_result' att.id %}" class="btn-icon" title="View"><i class="fas fa-eye"></i></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state-big animate-in">
+    <div class="empty-icon-big">📋</div>
+    <h3>No results yet</h3>
+    <p>Take your first test to see your results here.</p>
+    <a href="{% url 'test_list' %}" class="btn btn-primary">Browse Tests</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

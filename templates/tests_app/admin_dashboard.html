@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="page-header animate-in">
+    <div>
+      <h1 class="page-title">Admin Dashboard</h1>
+      <p class="page-subtitle">Manage tests and monitor student progress</p>
+    </div>
+    <div class="header-actions">
+      <a href="/admin/tests_app/test/add/" class="btn btn-primary" target="_blank">
+        <i class="fas fa-plus"></i> New Test
+      </a>
+      <a href="/admin/bulk-upload/" class="btn btn-secondary">
+        <i class="fas fa-upload"></i> Bulk Upload
+      </a>
+    </div>
+  </div>
+
+  <div class="stats-grid animate-in" style="--delay:0.1s">
+    <div class="stat-card">
+      <div class="stat-icon" style="--c:#1a3a5c">📋</div>
+      <div class="stat-value">{{ total_tests }}</div>
+      <div class="stat-label">Total Tests</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="--c:#c9a84c">📝</div>
+      <div class="stat-value">{{ total_attempts }}</div>
+      <div class="stat-label">Total Attempts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="--c:#2ecc71">👥</div>
+      <div class="stat-value">{{ total_users_attempted }}</div>
+      <div class="stat-label">Students Tested</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="--c:#e74c3c">📊</div>
+      <div class="stat-value">{% if avg_score %}{{ avg_score|floatformat:1 }}%{% else %}—{% endif %}</div>
+      <div class="stat-label">Avg Score</div>
+    </div>
+  </div>
+
+  <div class="section animate-in" style="--delay:0.2s">
+    <h2 class="section-title">All Tests</h2>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>Questions</th>
+            <th>Attempts</th>
+            <th>Avg Score</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for test in tests %}
+          <tr>
+            <td>
+              <strong>{{ test.title }}</strong>
+              {% if test.description %}<br><small class="text-muted">{{ test.description|truncatechars:60 }}</small>{% endif %}
+            </td>
+            <td><span class="badge">{{ test.question_count }}</span></td>
+            <td>{{ test.attempt_count|default:0 }}</td>
+            <td>
+              {% if test.avg_score %}
+                <span class="score-pill {% if test.avg_score >= test.passing_score %}pass{% else %}fail{% endif %}">
+                  {{ test.avg_score|floatformat:1 }}%
+                </span>
+              {% else %}—{% endif %}
+            </td>
+            <td>{{ test.duration_minutes }} min</td>
+            <td>
+              {% if test.is_active %}
+                <span class="status-dot active">Active</span>
+              {% else %}
+                <span class="status-dot inactive">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="actions-cell">
+              <a href="{% url 'test_detail_admin' test.id %}" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
+              <a href="/admin/tests_app/test/{{ test.id }}/change/" class="btn-icon" target="_blank" title="Edit"><i class="fas fa-edit"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="empty-state">No tests yet. <a href="/admin/bulk-upload/">Upload tests</a> or <a href="/admin/tests_app/test/add/" target="_blank">create one</a>.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section animate-in" style="--delay:0.3s">
+    <h2 class="section-title">Recent Attempts</h2>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr><th>Student</th><th>Test</th><th>Score</th><th>Result</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for att in recent_attempts %}
+          <tr>
+            <td>{{ att.user.full_name|default:att.user.username }}</td>
+            <td>{{ att.test.title|truncatechars:40 }}</td>
+            <td>
+              {% if att.score is not None %}
+              <span class="score-pill {% if att.passed %}pass{% else %}fail{% endif %}">{{ att.score|floatformat:1 }}%</span>
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if att.passed is not None %}
+                {% if att.passed %}<span class="badge badge-pass">Passed</span>{% else %}<span class="badge badge-fail">Failed</span>{% endif %}
+              {% else %}<span class="badge">In Progress</span>{% endif %}
+            </td>
+            <td>{{ att.started_at|date:"M d, Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="empty-state">No attempts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

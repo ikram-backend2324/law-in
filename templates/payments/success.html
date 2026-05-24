@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Payment Successful{% endblock %}
+{% block content %}
+<div class="page-container" style="max-width:480px;margin:0 auto;text-align:center">
+  <div class="result-card animate-in">
+    <div class="result-anim success-anim">✅</div>
+    <h1 class="result-title">Payment Successful!</h1>
+    <p class="result-subtitle">Your premium subscription is now active.</p>
+
+    {% if subscription %}
+    <div class="sub-details">
+      <div class="sub-row">
+        <span>Plan</span>
+        <strong>{{ subscription.plan.name }}</strong>
+      </div>
+      <div class="sub-row">
+        <span>Started</span>
+        <strong>{{ subscription.started_at|date:"d M Y" }}</strong>
+      </div>
+      <div class="sub-row">
+        <span>Expires</span>
+        <strong>{{ subscription.expires_at|date:"d M Y" }}</strong>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="result-actions">
+      <a href="{% url 'test_list' %}" class="btn btn-primary">
+        <i class="fas fa-scroll"></i> Browse Premium Tests
+      </a>
+      <a href="{% url 'dashboard' %}" class="btn btn-outline">
+        <i class="fas fa-th-large"></i> Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.result-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  margin-top: 3rem;
+}
+.result-anim { font-size: 4rem; margin-bottom: 1rem; animation: pop .4s cubic-bezier(.36,.07,.19,.97); }
+@keyframes pop { 0%{transform:scale(0)} 80%{transform:scale(1.2)} 100%{transform:scale(1)} }
+.result-title { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: .5rem; }
+.result-subtitle { color: var(--text-muted); margin-bottom: 1.75rem; }
+.sub-details {
+  background: rgba(46,204,113,.07);
+  border: 1px solid rgba(46,204,113,.2);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+.sub-row {
+  display: flex;
+  justify-content: space-between;
+  padding: .4rem 0;
+  font-size: .95rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(46,204,113,.1);
+}
+.sub-row:last-child { border-bottom: none; }
+.result-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+</style>
+{% endblock %}

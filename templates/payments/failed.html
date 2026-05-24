@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Payment Failed{% endblock %}
+{% block content %}
+<div class="page-container" style="max-width:480px;margin:0 auto;text-align:center">
+  <div class="result-card animate-in">
+    <div class="result-anim">❌</div>
+    <h1 class="result-title">Payment Failed</h1>
+    <p class="result-subtitle">
+      We couldn't process your payment. This can happen due to:<br>
+      incorrect card details, insufficient funds, or a bank restriction.
+    </p>
+    <div class="result-actions">
+      <a href="{% url 'pricing' %}" class="btn btn-primary">
+        <i class="fas fa-redo"></i> Try Again
+      </a>
+      <a href="{% url 'dashboard' %}" class="btn btn-outline">
+        <i class="fas fa-th-large"></i> Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.result-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  margin-top: 3rem;
+}
+.result-anim { font-size: 4rem; margin-bottom: 1rem; animation: shake .4s; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)}
+  60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
+}
+.result-title { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: .5rem; }
+.result-subtitle { color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; }
+.result-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+</style>
+{% endblock %}

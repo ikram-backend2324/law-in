@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title">My Profile</h1>
+  </div>
+  <div class="card profile-card">
+    <div class="profile-avatar-big">{{ user.username|slice:":1"|upper }}</div>
+    <div class="profile-info">
+      <h2>{{ user.full_name|default:user.username }}</h2>
+      <span class="badge badge-role">{{ user.get_role_display }}</span>
+      <div class="profile-details">
+        <div><i class="fas fa-user"></i> {{ user.username }}</div>
+        {% if user.email %}<div><i class="fas fa-envelope"></i> {{ user.email }}</div>{% endif %}
+        {% if user.phone %}<div><i class="fas fa-phone"></i> {{ user.phone }}</div>{% endif %}
+        <div><i class="fas fa-calendar"></i> Joined {{ user.date_joined|date:"M d, Y" }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

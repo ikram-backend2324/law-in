@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ test.title }} — Admin{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="page-header animate-in">
+    <div>
+      <a href="{% url 'dashboard' %}" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
+      <h1 class="page-title">{{ test.title }}</h1>
+    </div>
+    <a href="/admin/tests_app/test/{{ test.id }}/change/" target="_blank" class="btn btn-primary">
+      <i class="fas fa-edit"></i> Edit in Admin
+    </a>
+  </div>
+
+  <div class="stats-grid animate-in" style="--delay:0.1s">
+    <div class="stat-card">
+      <div class="stat-value">{{ test.question_count }}</div>
+      <div class="stat-label">Questions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ attempts.count }}</div>
+      <div class="stat-label">Attempts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{% if avg_score %}{{ avg_score|floatformat:1 }}%{% else %}—{% endif %}</div>
+      <div class="stat-label">Avg Score</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ pass_rate|floatformat:1 }}%</div>
+      <div class="stat-label">Pass Rate</div>
+    </div>
+  </div>
+
+  <div class="section animate-in" style="--delay:0.2s">
+    <h2 class="section-title">Student Attempts</h2>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead><tr><th>Student</th><th>Score</th><th>Correct</th><th>Result</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for att in attempts %}
+          <tr>
+            <td>{{ att.user.full_name|default:att.user.username }}</td>
+            <td><span class="score-pill {% if att.passed %}pass{% else %}fail{% endif %}">{{ att.score|floatformat:1 }}%</span></td>
+            <td>{{ att.correct_count }}/{{ att.total_questions }}</td>
+            <td>{% if att.passed %}<span class="badge badge-pass">Passed</span>{% else %}<span class="badge badge-fail">Failed</span>{% endif %}</td>
+            <td>{{ att.finished_at|date:"M d, Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="empty-state">No attempts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section animate-in" style="--delay:0.3s">
+    <h2 class="section-title">Questions ({{ test.question_count }})</h2>
+    {% for q in questions %}
+    <div class="question-preview-card">
+      <div class="question-preview-header">
+        <span class="q-num">Q{{ forloop.counter }}</span>
+        <p>{{ q.text }}</p>
+      </div>
+      <div class="answers-preview">
+        {% for ans in q.answers.all %}
+        <span class="ans-preview {% if ans.is_correct %}correct{% endif %}">
+          {{ ans.label }}. {{ ans.text }}{% if ans.is_correct %} ✓{% endif %}
+        </span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

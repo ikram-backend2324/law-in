@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}All Tests{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="page-header animate-in">
+    <div>
+      <h1 class="page-title">Available Tests</h1>
+      <p class="page-subtitle">Choose a test to begin</p>
+    </div>
+  </div>
+  <div class="tests-grid animate-in">
+    {% for test in tests %}
+    <div class="test-card {% if test.id in my_attempts %}completed{% endif %}">
+      <div class="test-card-header">
+        <span class="test-card-icon">⚖️</span>
+        {% if test.id in my_attempts %}<span class="test-badge done">Completed</span>
+        {% else %}<span class="test-badge new">Available</span>{% endif %}
+      </div>
+      <h3 class="test-card-title">{{ test.title }}</h3>
+      {% if test.description %}<p class="test-card-desc">{{ test.description|truncatechars:100 }}</p>{% endif %}
+      <div class="test-card-meta">
+        <span><i class="fas fa-question-circle"></i> {{ test.question_count }} questions</span>
+        <span><i class="fas fa-clock"></i> {{ test.duration_minutes }} min</span>
+        <span><i class="fas fa-star"></i> Pass: {{ test.passing_score }}%</span>
+      </div>
+      <div class="test-card-actions">
+        <a href="{% url 'take_test' test.id %}" class="btn btn-primary btn-sm">
+          {% if test.id in my_attempts %}Retake{% else %}Start Test{% endif %}
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-card"><p>No tests available.</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

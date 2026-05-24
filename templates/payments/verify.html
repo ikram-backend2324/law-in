@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Enter SMS Code{% endblock %}
+{% block content %}
+<div class="page-container" style="max-width:420px;margin:0 auto">
+  <div class="verify-card animate-in">
+    <div class="verify-icon">📱</div>
+    <h1 class="verify-title">Enter SMS Code</h1>
+    <p class="verify-subtitle">
+      We sent a verification code to the phone number linked to card
+      <strong>{{ payment.card_number_masked }}</strong>.
+    </p>
+
+    <div class="provider-tag provider-{{ payment.provider }}">
+      {{ payment.provider|upper }}
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="otp-group">
+        <input
+          type="text"
+          name="sms_code"
+          id="smsCode"
+          class="otp-input"
+          placeholder="— — — — — —"
+          maxlength="6"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          autofocus
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="verifyBtn">
+        <i class="fas fa-check-circle"></i> Confirm Payment
+      </button>
+    </form>
+
+    <div class="resend-row">
+      Didn't receive the code?
+      <a href="{% url 'resend_sms' payment.id %}" class="resend-link">Resend SMS</a>
+    </div>
+
+    <div class="payment-amount-note">
+      Charging: <strong>{{ payment.amount_uzs|floatformat:0 }} UZS</strong>
+      for <strong>{{ payment.plan.name }}</strong>
+    </div>
+  </div>
+</div>
+
+<style>
+.verify-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+.verify-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+.verify-title { font-size: 1.6rem; font-weight: 700; margin-bottom: .5rem; color: var(--text-primary); }
+.verify-subtitle { color: var(--text-muted); font-size: .95rem; margin-bottom: 1.25rem; line-height: 1.5; }
+.provider-tag {
+  display: inline-block;
+  padding: 3px 14px;
+  border-radius: 20px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+.provider-payme { background: #00A651; }
+.provider-click { background: #0099CC; }
+.otp-group { margin: 0 auto 1.5rem; }
+.otp-input {
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: .35em;
+  padding: .75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--input-bg, var(--card-bg));
+  color: var(--text-primary);
+  transition: border-color .2s;
+}
+.otp-input:focus { outline: none; border-color: var(--accent); }
+.resend-row { margin-top: 1.25rem; font-size: .9rem; color: var(--text-muted); }
+.resend-link { color: var(--primary); font-weight: 600; text-decoration: none; }
+.resend-link:hover { text-decoration: underline; }
+.payment-amount-note {
+  margin-top: 1.5rem;
+  padding: .75rem;
+  background: rgba(26,58,92,.05);
+  border-radius: 8px;
+  font-size: .88rem;
+  color: var(--text-muted);
+}
+</style>
+
+<script>
+document.getElementById('smsCode').addEventListener('input', function(e) {
+  this.value = this.value.replace(/\D/g, '').slice(0, 6);
+});
+</script>
+{% endblock %}

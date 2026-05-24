@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Law In{% endblock %} | ⚖️ Law In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="{% url 'dashboard' %}" class="nav-brand">
+      <span class="brand-icon">⚖️</span>
+      <span class="brand-text">Law <em>In</em></span>
+    </a>
+    <div class="nav-links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+          <i class="fas fa-th-large"></i><span>Dashboard</span>
+        </a>
+        {% if not user.is_admin_user %}
+        <a href="{% url 'test_list' %}" class="nav-link {% if 'test' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="fas fa-scroll"></i><span>Tests</span>
+        </a>
+        <a href="{% url 'my_results' %}" class="nav-link">
+          <i class="fas fa-chart-bar"></i><span>My Results</span>
+        </a>
+        <a href="{% url 'pricing' %}" class="nav-link {% if 'pricing' in request.resolver_match.url_name or 'checkout' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="fas fa-crown"></i><span>Premium</span>
+        </a>
+        {% else %}
+        <a href="/admin/" class="nav-link" target="_blank">
+          <i class="fas fa-cog"></i><span>Admin Panel</span>
+        </a>
+        <a href="/admin/bulk-upload/" class="nav-link">
+          <i class="fas fa-upload"></i><span>Bulk Upload</span>
+        </a>
+        {% endif %}
+      {% endif %}
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+        <span class="theme-icon sun">☀️</span>
+        <span class="theme-icon moon">🌙</span>
+        <span class="toggle-track"></span>
+      </button>
+      {% if user.is_authenticated %}
+      <div class="nav-user">
+        <span class="user-avatar">{{ user.username|slice:":1"|upper }}</span>
+        <span class="user-name">{{ user.full_name|default:user.username }}</span>
+        <div class="user-dropdown">
+          <a href="{% url 'profile' %}"><i class="fas fa-user"></i> Profile</a>
+          <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+      </div>
+      {% else %}
+      <a href="{% url 'login' %}" class="btn-nav">Login</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<main class="main-content">
+  {% if messages %}
+  <div class="messages-container">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} alert-dismissible" role="alert">
+      <span>{{ msg }}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-brand">⚖️ Law In</span>
+    <span class="footer-copy">Knowledge is Justice. All rights reserved © 2024</span>
+  </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

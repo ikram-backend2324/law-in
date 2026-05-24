@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Result — {{ attempt.test.title }}{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="result-hero animate-in {% if attempt.passed %}result-pass{% else %}result-fail{% endif %}">
+    <div class="result-icon">{% if attempt.passed %}🏆{% else %}📚{% endif %}</div>
+    <h1 class="result-title">{% if attempt.passed %}Congratulations!{% else %}Keep Studying!{% endif %}</h1>
+    <p class="result-test-name">{{ attempt.test.title }}</p>
+    <div class="result-score-big">{{ attempt.score|floatformat:1 }}<span>%</span></div>
+    <div class="result-meta">
+      <span>{{ attempt.correct_count }} / {{ attempt.total_questions }} correct</span>
+      <span>•</span>
+      <span>Passing score: {{ attempt.test.passing_score }}%</span>
+      <span>•</span>
+      <span>{% if attempt.passed %}<strong class="pass-text">Passed ✓</strong>{% else %}<strong class="fail-text">Not Passed ✗</strong>{% endif %}</span>
+    </div>
+    <div class="result-actions">
+      <a href="{% url 'dashboard' %}" class="btn btn-white">← Dashboard</a>
+      <a href="{% url 'take_test' attempt.test.id %}" class="btn btn-outline-white">Retake Test</a>
+    </div>
+  </div>
+
+  <div class="section animate-in" style="--delay:0.2s">
+    <h2 class="section-title">Question Review</h2>
+    <div class="review-list">
+      {% for ua in user_answers %}
+      <div class="review-card {% if ua.selected_answer and ua.selected_answer.is_correct %}correct{% else %}incorrect{% endif %}">
+        <div class="review-header">
+          <span class="review-num">Q{{ forloop.counter }}</span>
+          <span class="review-status">
+            {% if ua.selected_answer and ua.selected_answer.is_correct %}
+              <i class="fas fa-check-circle"></i> Correct
+            {% else %}
+              <i class="fas fa-times-circle"></i> Incorrect
+            {% endif %}
+          </span>
+        </div>
+        <p class="review-question">{{ ua.question.text }}</p>
+        <div class="review-answers">
+          {% for ans in ua.question.answers.all %}
+          <div class="review-answer
+            {% if ans.is_correct %}correct-answer{% endif %}
+            {% if ua.selected_answer and ua.selected_answer.id == ans.id and not ans.is_correct %}wrong-answer{% endif %}
+            {% if ua.selected_answer and ua.selected_answer.id == ans.id and ans.is_correct %}your-correct{% endif %}
+          ">
+            <span class="ans-label">{{ ans.label }}</span>
+            <span>{{ ans.text }}</span>
+            {% if ans.is_correct %}<span class="ans-tag correct-tag">✓ Correct</span>{% endif %}
+            {% if ua.selected_answer and ua.selected_answer.id == ans.id and not ans.is_correct %}<span class="ans-tag wrong-tag">✗ Your answer</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% if not ua.selected_answer %}
+          <p class="not-answered">Not answered</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

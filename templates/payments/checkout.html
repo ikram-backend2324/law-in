@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% block title %}Checkout — {{ plan.name }}{% endblock %}
+{% block content %}
+<div class="page-container" style="max-width:540px;margin:0 auto">
+  <div class="page-header animate-in">
+    <div>
+      <h1 class="page-title">💳 Checkout</h1>
+      <p class="page-subtitle">Complete your purchase securely</p>
+    </div>
+    <a href="{% url 'pricing' %}" class="btn btn-outline btn-sm">
+      <i class="fas fa-arrow-left"></i> Back
+    </a>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="order-summary animate-in">
+    <div class="order-row">
+      <span>Plan</span>
+      <strong>{{ plan.name }}</strong>
+    </div>
+    <div class="order-row">
+      <span>Duration</span>
+      <strong>{{ plan.duration_days }} days</strong>
+    </div>
+    <div class="order-row order-total">
+      <span>Total</span>
+      <strong class="total-amount">{{ plan.price_uzs|floatformat:0 }} UZS</strong>
+    </div>
+  </div>
+
+  <!-- Payment Form -->
+  <div class="checkout-card animate-in" style="--delay:0.1s">
+    <form method="post" id="checkoutForm">
+      {% csrf_token %}
+      <input type="hidden" name="provider" id="providerInput" value="">
+
+      <!-- Provider Selection -->
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <div class="provider-options">
+          {% if payme_enabled %}
+          <label class="provider-option" for="payme">
+            <input type="radio" name="provider_radio" id="payme" value="payme" onchange="selectProvider('payme')">
+            <div class="provider-card">
+              <div class="provider-logo payme-logo">P</div>
+              <span>Payme</span>
+            </div>
+          </label>
+          {% endif %}
+          {% if click_enabled %}
+          <label class="provider-option" for="click">
+            <input type="radio" name="provider_radio" id="click" value="click" onchange="selectProvider('click')">
+            <div class="provider-card">
+              <div class="provider-logo click-logo">C</div>
+              <span>Click</span>
+            </div>
+          </label>
+          {% endif %}
+          {% if not payme_enabled and not click_enabled %}
+          <div style="color:var(--text-muted);padding:1rem;text-align:center">
+            ⚠️ Payment methods not configured yet. Contact admin.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Card Number -->
+      <div class="form-group">
+        <label class="form-label" for="card_number">Card Number</label>
+        <div class="card-input-wrap">
+          <i class="fas fa-credit-card card-icon"></i>
+          <input
+            type="text"
+            class="form-control card-number-input"
+            id="card_number"
+            name="card_number"
+            placeholder="0000 0000 0000 0000"
+            maxlength="19"
+            autocomplete="cc-number"
+            inputmode="numeric"
+            required
+          >
+        </div>
+      </div>
+
+      <!-- Expiry -->
+      <div class="form-group">
+        <label class="form-label" for="expire">Expiry Date</label>
+        <div class="card-input-wrap" style="max-width:180px">
+          <i class="fas fa-calendar card-icon"></i>
+          <input
+            type="text"
+            class="form-control"
+            id="expire"
+            name="expire"
+            placeholder="MM/YY"
+            maxlength="5"
+            autocomplete="cc-exp"
+            inputmode="numeric"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="sms-note">
+        <i class="fas fa-mobile-alt"></i>
+        An SMS code will be sent to the phone number linked to your card.
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn" disabled>
+        <i class="fas fa-lock"></i> Pay {{ plan.price_uzs|floatformat:0 }} UZS
+      </button>
+    </form>
+  </div>
+
+  <div class="secure-note">
+    <i class="fas fa-shield-alt"></i> Your card data is transmitted securely via SSL
+  </div>
+</div>
+
+<style>
+.order-summary {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem 0;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: .95rem;
+}
+.order-row:last-child { border-bottom: none; }
+.order-total { font-size: 1.05rem; padding-top: .75rem; }
+.total-amount { color: var(--accent); font-size: 1.25rem; }
+.checkout-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1rem;
+}
+.provider-options { display: flex; gap: 1rem; margin-top: .5rem; }
+.provider-option { cursor: pointer; flex: 1; }
+.provider-option input { display: none; }
+.provider-card {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  transition: all .2s;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: .9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+}
+.provider-option input:checked + .provider-card {
+  border-color: var(--accent);
+  background: rgba(201,168,76,.08);
+  color: var(--accent);
+}
+.provider-logo {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 1.2rem; color: white;
+}
+.payme-logo { background: #00A651; }
+.click-logo { background: #0099CC; }
+.card-input-wrap { position: relative; }
+.card-icon {
+  position: absolute;
+  left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.card-number-input { padding-left: 2.5rem !important; letter-spacing: .1em; font-size: 1.1rem; }
+.sms-note {
+  background: rgba(26,58,92,.06);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  padding: .75rem 1rem;
+  margin: 1.25rem 0;
+  color: var(--text-secondary);
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.btn-lg { padding: .85rem 1.5rem; font-size: 1rem; }
+.secure-note {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .82rem;
+  padding: .5rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+}
+</style>
+
+<script>
+function selectProvider(val) {
+  document.getElementById('providerInput').value = val;
+  checkReady();
+}
+
+function checkReady() {
+  const provider = document.getElementById('providerInput').value;
+  const card = document.getElementById('card_number').value.replace(/\s/g,'');
+  const expire = document.getElementById('expire').value;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = !(provider && card.length >= 16 && expire.length >= 5);
+}
+
+// Card number formatting — groups of 4
+document.getElementById('card_number').addEventListener('input', function(e) {
+  let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+  e.target.value = v.match(/.{1,4}/g)?.join(' ') || v;
+  checkReady();
+});
+
+// Expiry formatting MM/YY
+document.getElementById('expire').addEventListener('input', function(e) {
+  let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+  if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+  e.target.value = v;
+  checkReady();
+});
+
+// Pre-select provider if only one is available
+document.addEventListener('DOMContentLoaded', function() {
+  const radios = document.querySelectorAll('input[name="provider_radio"]');
+  if (radios.length === 1) {
+    radios[0].checked = true;
+    selectProvider(radios[0].value);
+  }
+});
+</script>
+{% endblock %}

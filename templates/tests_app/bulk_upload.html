@@ -1,0 +1,202 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Upload — Law In Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',sans-serif;background:#f4f6f8;color:#333;padding:2rem;}
+  .container{max-width:860px;margin:0 auto;}
+  h1{font-size:1.8rem;margin-bottom:.3rem;color:#1a3a5c;}
+  .subtitle{color:#666;margin-bottom:2rem;font-size:.95rem;}
+  .card{background:#fff;border-radius:12px;padding:2rem;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:1.5rem;}
+  .card h2{font-size:1.05rem;margin-bottom:1.2rem;color:#1a3a5c;border-bottom:2px solid #f0f0f0;padding-bottom:.7rem;display:flex;align-items:center;gap:.5rem;}
+  .messages{margin-bottom:1.5rem;}
+  .alert{padding:.9rem 1.2rem;border-radius:8px;margin-bottom:.6rem;font-size:.93rem;display:flex;align-items:center;gap:.6rem;}
+  .alert-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb;}
+  .alert-error,.alert-danger{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;}
+  .alert-warning{background:#fff3cd;color:#856404;border:1px solid #ffeeba;}
+  .upload-area{border:2px dashed #c9a84c;border-radius:12px;padding:2.5rem;text-align:center;cursor:pointer;transition:.2s;background:#fffdf5;}
+  .upload-area:hover,.upload-area.drag{border-color:#1a3a5c;background:#f0f4ff;}
+  .upload-icon{font-size:2.5rem;margin-bottom:.75rem;color:#c9a84c;}
+  .upload-area p{color:#666;margin:.3rem 0;font-size:.9rem;}
+  .upload-area input{display:none;}
+  .formats{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.75rem;}
+  .fmt-badge{background:#1a3a5c;color:#fff;padding:.25rem .75rem;border-radius:20px;font-size:.78rem;font-weight:600;}
+  .file-info{display:none;margin-top:1rem;padding:.8rem 1.2rem;background:#e8f4fd;border-radius:8px;color:#1a3a5c;font-weight:600;font-size:.9rem;}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:8px;font-size:.92rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:.2s;}
+  .btn-primary{background:#1a3a5c;color:#fff;} .btn-primary:hover{background:#0f2233;}
+  .btn-sm{padding:.45rem 1rem;font-size:.82rem;}
+  .submit-row{display:flex;gap:1rem;align-items:center;margin-top:1.2rem;flex-wrap:wrap;}
+  .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;}
+  .tpl-card{border:1px solid #e0e0e0;border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:#333;transition:.2s;}
+  .tpl-card:hover{border-color:#c9a84c;background:#fffdf5;transform:translateY(-2px);}
+  .tpl-icon{font-size:1.8rem;margin-bottom:.4rem;}
+  .tpl-ext{font-weight:700;font-size:.88rem;color:#1a3a5c;display:block;}
+  .tpl-label{font-size:.75rem;color:#888;display:block;margin-top:.15rem;}
+  .back-link{display:inline-flex;align-items:center;gap:.4rem;color:#1a3a5c;text-decoration:none;margin-bottom:1rem;font-size:.88rem;}
+  .back-link:hover{text-decoration:underline;}
+  /* Tabs */
+  .tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:1.2rem;}
+  .tab{padding:.6rem 1.2rem;cursor:pointer;font-size:.88rem;font-weight:600;color:#888;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;}
+  .tab.active{color:#1a3a5c;border-bottom-color:#c9a84c;}
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+  /* Table format */
+  .table-fmt{width:100%;border-collapse:collapse;font-size:.83rem;margin-top:.5rem;}
+  .table-fmt th{background:#1a3a5c;color:#fff;padding:.55rem .75rem;text-align:left;}
+  .table-fmt td{padding:.45rem .75rem;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+  .table-fmt tr:last-child td{border:none;}
+  /* Free-text example */
+  .code-block{background:#0e1624;color:#e8e4d8;padding:1.2rem 1.4rem;border-radius:10px;font-family:'Courier New',monospace;font-size:.82rem;line-height:1.7;overflow-x:auto;white-space:pre;}
+  .code-block .kw{color:#c9a84c;}
+  .code-block .ans{color:#2ecc71;}
+  .note{background:#fff8e1;border-left:4px solid #c9a84c;padding:.9rem 1.1rem;border-radius:0 8px 8px 0;font-size:.87rem;margin-top:1rem;}
+  code{background:#f0f0f0;padding:.1rem .4rem;border-radius:4px;font-size:.82rem;}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/admin/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Admin</a>
+  <h1>⬆️ Bulk Upload Tests</h1>
+  <p class="subtitle">Upload multiple tests and questions at once — table format <strong>or</strong> free-text format supported.</p>
+
+  {% if messages %}
+  <div class="messages">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }}">
+      {% if 'success' in msg.tags %}✅{% elif 'error' in msg.tags %}❌{% else %}⚠️{% endif %}
+      {{ msg }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2><i class="fas fa-upload"></i> Upload File</h2>
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      {% csrf_token %}
+      <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📁</div>
+        <p><strong>Click to browse</strong> or drag & drop</p>
+        <p>Table format or free-text format — both accepted</p>
+        <div class="formats">
+          <span class="fmt-badge">.xlsx</span>
+          <span class="fmt-badge">.csv</span>
+          <span class="fmt-badge">.pdf</span>
+          <span class="fmt-badge">.docx</span>
+        </div>
+        <input type="file" id="fileInput" name="bulk_file" accept=".xlsx,.csv,.pdf,.docx">
+      </div>
+      <div class="file-info" id="fileInfo"><i class="fas fa-file"></i> <span id="fileName"></span></div>
+      <div class="submit-row">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Upload & Import</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2><i class="fas fa-info-circle"></i> Supported Formats</h2>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('table',this)">📊 Table Format</div>
+      <div class="tab" onclick="switchTab('freetext',this)">📝 Free-Text Format</div>
+    </div>
+
+    <div class="tab-panel active" id="tab-table">
+      <p style="color:#666;font-size:.88rem;margin-bottom:.8rem;">Use a table (in Excel, CSV, Word, or PDF) with these exact column headers in the first row:</p>
+      <table class="table-fmt">
+        <thead><tr><th>Column</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>test_title</code></td><td>Groups questions into one test</td><td>Constitutional Law</td></tr>
+          <tr><td><code>question_text</code></td><td>The question itself</td><td>What is the supreme law?</td></tr>
+          <tr><td><code>option_a</code></td><td>Answer option A</td><td>The President</td></tr>
+          <tr><td><code>option_b</code></td><td>Answer option B</td><td>The Constitution</td></tr>
+          <tr><td><code>option_c</code></td><td>Answer option C</td><td>The Courts</td></tr>
+          <tr><td><code>option_d</code></td><td>Answer option D</td><td>Parliament</td></tr>
+          <tr><td><code>correct_answer</code></td><td>Correct letter: A, B, C or D</td><td>B</td></tr>
+        </tbody>
+      </table>
+      <div class="note">💡 Questions with the same <code>test_title</code> are grouped into one test automatically.</div>
+    </div>
+
+    <div class="tab-panel" id="tab-freetext">
+      <p style="color:#666;font-size:.88rem;margin-bottom:.8rem;">Write questions in plain text inside your <strong>.docx</strong> or <strong>.pdf</strong> — no table needed. Use this structure:</p>
+      <div class="code-block"><span class="kw">Test: Constitutional Law</span>
+
+1. What is the supreme law of Uzbekistan?
+A) Presidential decree
+B) The Constitution
+C) Parliamentary law
+D) International treaties
+<span class="ans">Answer: B</span>
+
+2. When was the Constitution adopted?
+A) 1991
+B) 1993
+C) 1992
+D) 1995
+<span class="ans">Answer: C</span>
+
+<span class="kw">Test: Civil Law</span>
+
+1. What does "plaintiff" mean?
+A) The judge
+B) The defendant
+C) The person who files a lawsuit
+D) The lawyer
+<span class="ans">Answer: C</span></div>
+      <div class="note">
+        💡 <strong>Rules:</strong>
+        <ul style="margin-top:.4rem;padding-left:1.2rem;line-height:1.8;font-size:.86rem;">
+          <li>Start a new test with <code>Test: Title here</code></li>
+          <li>Number questions: <code>1.</code> or <code>1)</code> or <code>Q1:</code></li>
+          <li>Options: <code>A)</code> or <code>A.</code> or <code>A:</code></li>
+          <li>Mark the answer: <code>Answer: B</code> or <code>Correct: B</code></li>
+          <li>Works with both .docx and .pdf (text-based, not scanned)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><i class="fas fa-download"></i> Download Templates</h2>
+    <div class="templates-grid">
+      <a href="{% url 'download_template' 'xlsx' %}" class="tpl-card"><div class="tpl-icon">📊</div><span class="tpl-ext">.xlsx</span><span class="tpl-label">Excel table</span></a>
+      <a href="{% url 'download_template' 'csv' %}" class="tpl-card"><div class="tpl-icon">📄</div><span class="tpl-ext">.csv</span><span class="tpl-label">CSV table</span></a>
+      <a href="{% url 'download_template' 'docx' %}" class="tpl-card"><div class="tpl-icon">📝</div><span class="tpl-ext">.docx</span><span class="tpl-label">Word table</span></a>
+      <a href="{% url 'download_template' 'pdf' %}" class="tpl-card"><div class="tpl-icon">📋</div><span class="tpl-ext">.pdf</span><span class="tpl-label">PDF guide</span></a>
+    </div>
+  </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileInfo  = document.getElementById('fileInfo');
+const fileName  = document.getElementById('fileName');
+
+fileInput.addEventListener('change', function(){
+  if(this.files[0]){
+    fileName.textContent = this.files[0].name + ' (' + (this.files[0].size/1024).toFixed(1) + ' KB)';
+    fileInfo.style.display = 'block';
+  }
+});
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file){ const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files; fileName.textContent = file.name; fileInfo.style.display = 'block'; }
+});
+
+function switchTab(name, el){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>
+</body>
+</html>

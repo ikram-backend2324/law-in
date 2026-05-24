@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Premium Plans{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="page-header animate-in">
+    <div>
+      <h1 class="page-title">👑 Premium Access</h1>
+      <p class="page-subtitle">Unlock all premium tests with a subscription</p>
+    </div>
+    {% if has_subscription %}
+    <a href="{% url 'test_list' %}" class="btn btn-primary">
+      <i class="fas fa-scroll"></i> Browse Tests
+    </a>
+    {% endif %}
+  </div>
+
+  {% if has_subscription and active_subscription %}
+  <div class="alert alert-success animate-in" style="margin-bottom:2rem;display:flex;align-items:center;gap:1rem">
+    <span style="font-size:2rem">✅</span>
+    <div>
+      <strong>You have an active subscription!</strong><br>
+      Plan: <strong>{{ active_subscription.plan.name }}</strong> —
+      Expires: <strong>{{ active_subscription.expires_at|date:"d M Y" }}</strong>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if plans %}
+  <div class="plans-grid animate-in" style="--delay:0.1s">
+    {% for plan in plans %}
+    <div class="plan-card {% if forloop.counter == 2 %}plan-featured{% endif %}">
+      {% if forloop.counter == 2 %}<div class="plan-badge">Most Popular</div>{% endif %}
+      <div class="plan-icon">👑</div>
+      <h2 class="plan-name">{{ plan.name }}</h2>
+      {% if plan.description %}
+        <p class="plan-desc">{{ plan.description }}</p>
+      {% endif %}
+      <div class="plan-price">
+        <span class="plan-amount">{{ plan.price_uzs|floatformat:0 }}</span>
+        <span class="plan-currency">UZS</span>
+      </div>
+      <div class="plan-duration">
+        <i class="fas fa-calendar-alt"></i> {{ plan.duration_days }} days access
+      </div>
+      <ul class="plan-features">
+        <li><i class="fas fa-check"></i> All premium tests</li>
+        <li><i class="fas fa-check"></i> Unlimited attempts</li>
+        <li><i class="fas fa-check"></i> Detailed results</li>
+        <li><i class="fas fa-check"></i> Progress tracking</li>
+      </ul>
+      {% if has_subscription %}
+        <a href="{% url 'checkout' plan.id %}" class="btn btn-outline btn-block">Renew / Extend</a>
+      {% else %}
+        <a href="{% url 'checkout' plan.id %}" class="btn btn-primary btn-block">
+          <i class="fas fa-credit-card"></i> Get Access
+        </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-card animate-in">
+    <div class="empty-icon">📋</div>
+    <p>No subscription plans available yet. Check back soon!</p>
+  </div>
+  {% endif %}
+
+  <div class="payment-trust animate-in" style="--delay:0.3s">
+    <h3>Secure Payment</h3>
+    <div class="trust-badges">
+      <div class="trust-badge">
+        <img src="https://paycom.uz/static/media/logo-payme.e99da7c9.svg" alt="Payme" onerror="this.style.display='none'" style="height:28px">
+        <span>Payme</span>
+      </div>
+      <div class="trust-badge">
+        <span style="font-size:1.5rem">💳</span>
+        <span>Click</span>
+      </div>
+      <div class="trust-badge">
+        <i class="fas fa-shield-alt" style="color:#1a3a5c;font-size:1.5rem"></i>
+        <span>SSL Secured</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto 3rem;
+}
+.plan-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  transition: transform .2s, box-shadow .2s;
+}
+.plan-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.12); }
+.plan-featured {
+  border-color: var(--accent);
+  box-shadow: 0 8px 30px rgba(201,168,76,.2);
+}
+.plan-badge {
+  position: absolute;
+  top: -14px; left: 50%; transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 4px 16px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.plan-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+.plan-name { font-size: 1.3rem; font-weight: 700; margin-bottom: .5rem; color: var(--text-primary); }
+.plan-desc { color: var(--text-muted); font-size: .9rem; margin-bottom: 1rem; }
+.plan-price { display: flex; align-items: baseline; justify-content: center; gap: .3rem; margin: 1rem 0; }
+.plan-amount { font-size: 2.5rem; font-weight: 900; color: var(--primary); }
+.plan-currency { font-size: 1rem; color: var(--text-muted); font-weight: 600; }
+.plan-duration { color: var(--text-muted); font-size: .9rem; margin-bottom: 1.25rem; }
+.plan-features { list-style: none; padding: 0; margin: 0 0 1.5rem; text-align: left; }
+.plan-features li { padding: .35rem 0; display: flex; align-items: center; gap: .5rem; font-size: .9rem; color: var(--text-secondary); }
+.plan-features li i { color: #2ecc71; width: 16px; }
+.btn-block { display: block; width: 100%; text-align: center; }
+.payment-trust { text-align: center; padding: 2rem 0; border-top: 1px solid var(--border); }
+.payment-trust h3 { color: var(--text-muted); font-size: .9rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .1em; }
+.trust-badges { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+.trust-badge { display: flex; flex-direction: column; align-items: center; gap: .3rem; color: var(--text-muted); font-size: .8rem; font-weight: 600; }
+</style>
+{% endblock %}
